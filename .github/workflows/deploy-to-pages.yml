@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages
+
+# Wird ausgelöst bei jedem Push auf den main Branch
+on:
+  push:
+    branches:
+      - main
+
+# Erlaubt manuelles Auslösen über die Actions-Tab
+  workflow_dispatch:
+
+# Setzt Berechtigungen für den GITHUB_TOKEN
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Verhindert gleichzeitige Deployments
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Pfad zu den Dateien, die deployed werden sollen
+          # Standard: Root-Verzeichnis des Repositories
+          # Falls deine Dateien in einem Unterordner liegen (z.B. 'public' oder 'dist'), ändere dies hier
+          path: '.'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
